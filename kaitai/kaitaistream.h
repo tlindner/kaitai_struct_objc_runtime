@@ -156,7 +156,7 @@
      * @return unpacked data
      * @throws IOException
      */
-- (NSData *)process_zlib(NSData *)data;
+- (NSData *)process_zlib:(NSData *)data;
 #endif
 
 /**

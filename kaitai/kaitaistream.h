@@ -149,14 +149,6 @@
 - (NSData *)ensure_fixed_contents:(NSData *)expected;
 + (void) throwIf:(NSData *)t smallerThan:(NSUInteger)v;
 
-#ifdef KS_ZLIB
-    /**
-     * Performs an unpacking ("inflation") of zlib-compressed data with usual zlib headers.
-     * @param data data to unpack
-     * @return unpacked data
-     * @throws IOException
-     */
-- (NSData *)process_zlib:(NSData *)data;
 #endif
 
 /**
@@ -227,6 +219,14 @@
 
 - (NSData *)KSBytesTerminateTerm:(char)term include:(BOOL)include;
 
+#ifdef KS_ZLIB
+    /**
+     * Performs an unpacking ("inflation") of zlib-compressed data with usual zlib headers.
+     * @param data data to unpack
+     * @return unpacked data
+     * @throws IOException
+     */
+- (NSData *)process_zlib;
 @end
 
 @interface NSNumber (KSNumberPrivateMethods)

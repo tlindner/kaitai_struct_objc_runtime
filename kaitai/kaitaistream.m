@@ -6,6 +6,11 @@
 #define bswap_32(x) OSSwapInt32(x)
 #define bswap_64(x) OSSwapInt64(x)
 
+#ifdef KS_ZLIB
+#include <zlib.h>
+#define ZLIB_BUF_SIZE 128 * 1024
+#endif
+
 uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 @interface kstream ()
@@ -27,14 +32,14 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 {
     NSError *myErr;
     NSFileHandle *io = [NSFileHandle fileHandleForReadingFromURL:url error: &myErr];
-    
+
     if (io) {
         return [[kstream alloc] initWithFileHandle:io];
     }
     else {
         [NSException raise:@"Count not Open URL" format:@"%@", myErr];
     }
-    
+
     return nil;
 }
 
@@ -53,7 +58,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     if (self) {
         [self alignToByte];
     }
-    
+
     return self;
 }
 
@@ -62,7 +67,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.fh = io;
     self.size = [io seekToEndOfFile];
     [io seekToFileOffset:0];
-    
+
     return [self init];
 }
 
@@ -70,7 +75,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 {
     self.dh = data;
     self.size = data.length;
-    
+
     return [self init];
 }
 
@@ -116,7 +121,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 {
     if (self.dh) {
         _pos = pos;
-        
+
         if (_pos > self.size) _pos = self.size;
     } else {
         [self.fh seekToFileOffset:pos];
@@ -136,7 +141,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:1]) getBytes:&t range:NSMakeRange(v_pos, 1)];
 
     return @(t);
@@ -155,7 +160,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -176,7 +181,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -199,12 +204,12 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     }
 
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
-    
+
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     t = bswap_64(t);
 #endif
-    
+
     return @(t);
 }
 
@@ -220,7 +225,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -241,7 +246,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -262,7 +267,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -285,7 +290,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:1]) getBytes:&t range:NSMakeRange(v_pos, 1)];
 
     return @(t);
@@ -304,7 +309,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -325,7 +330,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -346,7 +351,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -369,7 +374,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -390,7 +395,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -411,7 +416,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -435,7 +440,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -457,13 +462,13 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     t = bswap_64(t);
 #endif
-    
+
     double *d = (double *)&t;
     return @(*d);
 }
@@ -481,7 +486,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -496,14 +501,14 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 {
     uint64_t t;
     NSUInteger v_pos;
-    
+
     if (self.dh) {
         v_pos = _pos;
         _pos += 8;
     } else {
         v_pos = 0;
     }
-    
+
     [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -536,16 +541,16 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         }
         char *buf;
         NSUInteger v_pos;
-        
+
         if (self.dh) {
             v_pos = _pos;
             _pos += bytes_needed;
         } else {
             v_pos = 0;
         }
-        
+
         [(self.dh ? self.dh : [self.fh readDataOfLength:bytes_needed]) getBytes:&buf range:NSMakeRange(v_pos, bytes_needed)];
-        
+
         for (int i = 0; i < bytes_needed; i++) {
             uint8_t b = buf[i];
             self.m_bits <<= 8;
@@ -553,7 +558,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
             self.m_bits_left += 8;
         }
     }
-    
+
     // raw mask with required number of 1s, starting from lowest bit
     uint64_t mask = kaitai_kstream_get_mask_ones(n);
     // shift mask to align with highest bits available in @bits
@@ -565,7 +570,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.m_bits_left -= n;
     mask = kaitai_kstream_get_mask_ones(self.m_bits_left);
     self.m_bits &= mask;
-    
+
     return [NSNumber numberWithUnsignedLong:res];
 }
 
@@ -574,7 +579,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 -(NSData *)read_bytes:(NSUInteger)len
 {
     NSData *result;
-    
+
     if (self.dh) {
         result = [self.dh subdataWithRange:NSMakeRange(_pos, len)];
         _pos += len;
@@ -583,14 +588,14 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     }
 
     [kstream throwIf:result smallerThan:len];
-    
+
     return result;
 }
 
 -(NSData *)read_bytes_full
 {
     NSData *result;
-    
+
     if (self.dh) {
         NSRange range = NSMakeRange(_pos, self.size - _pos);
         result = [self.dh subdataWithRange:range];
@@ -598,7 +603,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         result = [self.fh readDataToEndOfFile];
     }
-    
+
     return result;
 }
 
@@ -613,7 +618,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         {
             if(buf[_pos++] == character) break;
         }
-        
+
         if (_pos == self.size) {
             if (eos_error) {
                 NSException *myException = [NSException exceptionWithName:@"read_bytes_term: encountered EOF" reason:nil userInfo:nil];
@@ -630,7 +635,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     } else {
         NSMutableData *buffer = [NSMutableData data];
         NSData *temp;
-        
+
         while((temp = [self.fh readDataOfLength:1]))
         {
             if (temp.length == 0) {
@@ -640,13 +645,13 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
                 }
                 break;
             }
-            
+
             char t = ((char *)temp.bytes)[0];
             if (t == character) {
                 if(include) [buffer appendData:temp];
                 break;
             }
-            
+
             [buffer appendData:temp];
         }
 
@@ -654,94 +659,31 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         result = [temp copy];
     }
-    
+
     return result;
 }
 
 -(NSData *)ensure_fixed_contents:(NSData *)expected
 {
     NSData *actual = [self read_bytes:expected.length];
-    
+
     if (![actual isEqualToData:expected]) {
         NSException *myException = [NSException exceptionWithName:@"ensure_fixed_contents: actual data does not match expected data" reason:nil userInfo:nil];
         @throw myException;
     }
-    
+
     return actual;
-}
-
-#ifdef KS_ZLIB
-#include <zlib.h>
-
--(NSData *)process_zlib(NSData *)data
-{
-    int ret;
-    
-    unsigned char *src_ptr = (unsigned char *)data.bytes;
-    std::stringstream dst_strm;
-    
-    z_stream strm;
-    strm.zalloc = Z_NULL;
-    strm.zfree = Z_NULL;
-    strm.opaque = Z_NULL;
-    
-    ret = inflateInit(&strm);
-    if (ret != Z_OK) {
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateInit error" reason:nil userInfo:nil];
-        @throw myException;
-    }
-
-    strm.next_in = src_ptr;
-    strm.avail_in = data.length;
-    
-    unsigned char outbuffer[ZLIB_BUF_SIZE];
-    NSMutabeData *outdata = [NSMutableData data];
-    
-    // get the decompressed bytes blockwise using repeated calls to inflate
-    do {
-        strm.next_out = outbuffer;
-        strm.avail_out = sizeof(outbuffer);
-        
-        ret = inflate(&strm, 0);
-        
-        if (outdata.length < strm.total_out)
-            [outdata appendData:[NSData dataWithBytes:outbuffer size:strm.total_out - outdata.length]]
-    } while (ret == Z_OK);
-    
-    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: Z Lib error" reason:nil userInfo:nil];
-        @throw myException;
-    }
-    
-    if (inflateEnd(&strm) != Z_OK) {
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateEnd error" reason:nil userInfo:nil];
-        @throw myException;
-    }
-    
-    return [outdata copy];
-}
-
-#endif
-
--(int) modA:(int)a b:(int)b;
-{
-    if (b <= 0)
-        [NSException raise:@"modulus b <= 0" format:@""];
-    int r = a % b;
-    if (r < 0)
-        r += b;
-    return r;
 }
 
 - (NSData *)reverse:(NSData *)val
 {
     const char *bytes = val.bytes;
-    
+
     NSUInteger datalength = val.length;
-    
+
     char *reverseBytes = malloc(sizeof(char) * datalength);
     NSUInteger index = datalength - 1;
-    
+
     for (int i = 0; i < datalength; i++)
         reverseBytes[index--] = bytes[i];
 
@@ -754,6 +696,16 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         NSException *myException = [NSException exceptionWithName:[NSString stringWithFormat:@"smaller than expected read: %lu < %lu", (unsigned long)t.length, (unsigned long)v] reason:nil userInfo:nil];
         @throw myException;
     }
+}
+
+-(int) modA:(int)a b:(int)b;
+{
+    if (b <= 0)
+        [NSException raise:@"modulus b <= 0" format:@""];
+    int r = a % b;
+    if (r < 0)
+        r += b;
+    return r;
 }
 
 @end
@@ -775,7 +727,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     if (self) {
         self._io = p__io;
         self._parent = p__parent;
-        
+
         if (p__root == nil) {
             self._root = self;
         }
@@ -845,7 +797,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 {
     NSStringEncoding e = NSUTF8StringEncoding;
     NSString *lc_enc =src_enc.lowercaseString;
-    
+
     if ([lc_enc isEqualToString:@"ascii"]) {
         e = NSMacOSRomanStringEncoding; /* OS X's ASCII is strictly 7 bit */
     } else if ([lc_enc isEqualToString:@"utf-8"]) {
@@ -857,7 +809,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     } else {
         [NSException raise:@"unsupported string encoding" format:@"unsupported string encoding: %@", lc_enc];
     }
-    
+
     return [[NSString alloc] initWithData:self encoding:e];
 }
 
@@ -875,17 +827,17 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 {
     size_t len = self.length;
     unsigned char *buf = malloc(len);
-    
+
     if (!buf) {
         NSException *myException = [NSException exceptionWithName:@"process_xor_one: out of memory" reason:nil userInfo:nil];
         @throw myException;
     }
-    
+
     unsigned char *src = (unsigned char *)self.bytes;
-    
+
     for (size_t i = 0; i < len; i++)
         buf[i] = src[i] ^ key;
-    
+
     return [NSData dataWithBytesNoCopy:buf length:len];
 }
 
@@ -895,14 +847,14 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     size_t kl = key.length;
     unsigned char *self_buf = (unsigned char *)self.bytes;
     unsigned char *key_buf = (unsigned char *)key.bytes;
-    
+
     unsigned char *buf = malloc(len);
-    
+
     if (!buf) {
         NSException *myException = [NSException exceptionWithName:@"process_xor_many: out of memory" reason:nil userInfo:nil];
         @throw myException;
     }
-    
+
     size_t ki = 0;
     for (size_t i = 0; i < len; i++) {
         buf[i] = self_buf[i] ^ key_buf[ki];
@@ -910,7 +862,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
         if (ki >= kl)
             ki = 0;
     }
-    
+
     return [NSData dataWithBytesNoCopy:buf length:len];
 }
 
@@ -919,17 +871,17 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     size_t len = self.length;
     unsigned char *buf = malloc(len);
     unsigned char *self_buf = (unsigned char *)self.bytes;
-    
+
     if (!buf) {
         NSException *myException = [NSException exceptionWithName:@"process_rotate_left: out of memory" reason:nil userInfo:nil];
         @throw myException;
     }
-    
+
     for (size_t i = 0; i < len; i++) {
         uint8_t bits = self_buf[i];
         buf[i] = (bits << amount) | (bits >> (8 - amount));
     }
-    
+
     return [NSData dataWithBytesNoCopy:buf length:len];
 }
 
@@ -937,7 +889,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 {
     size_t new_len = self.length;
     char *self_ptr = (char *)self.bytes;
-    
+
     while (new_len > 0 && self_ptr[new_len - 1] == pad_byte)
         new_len--;
     NSRange range = NSMakeRange(0, new_len);
@@ -949,16 +901,65 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     size_t new_len = 0;
     size_t max_len = self.length;
     char *self_ptr = (char *)self.bytes;
-    
+
     while (new_len < max_len && self_ptr[new_len] != term)
         new_len++;
-    
+
     if (include && new_len < max_len)
         new_len++;
-    
+
     NSRange range = NSMakeRange(0, new_len);
     return [self subdataWithRange:range];
 }
+
+#ifdef KS_ZLIB
+-(NSData *)process_zlib
+{
+    int ret;
+
+    unsigned char *src_ptr = (unsigned char *)self.bytes;
+
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+
+    ret = inflateInit(&strm);
+    if (ret != Z_OK) {
+        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateInit error" reason:nil userInfo:nil];
+        @throw myException;
+    }
+
+    strm.next_in = src_ptr;
+    strm.avail_in = self.length;
+
+    unsigned char outbuffer[ZLIB_BUF_SIZE];
+    NSMutableData *outdata = [NSMutableData data];
+
+    // get the decompressed bytes blockwise using repeated calls to inflate
+    do {
+        strm.next_out = outbuffer;
+        strm.avail_out = sizeof(outbuffer);
+
+        ret = inflate(&strm, 0);
+
+        if (outdata.length < strm.total_out)
+            [outdata appendData:[NSData dataWithBytes:outbuffer length:strm.total_out - outdata.length]];
+    } while (ret == Z_OK);
+
+    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
+        NSException *myException = [NSException exceptionWithName:@"process_zlib: Z Lib error" reason:nil userInfo:nil];
+        @throw myException;
+    }
+
+    if (inflateEnd(&strm) != Z_OK) {
+        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateEnd error" reason:nil userInfo:nil];
+        @throw myException;
+    }
+
+    return [outdata copy];
+}
+#endif
 
 @end
 
@@ -971,7 +972,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
             return @{ @"enum" : key, @"value" : self};
         }
     }
-    
+
     return @{ @"enum" : @"unknown", @"value" : self };
 }
 

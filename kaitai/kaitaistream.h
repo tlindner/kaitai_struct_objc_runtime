@@ -149,7 +149,6 @@
 - (NSData *)ensure_fixed_contents:(NSData *)expected;
 + (void) throwIf:(NSData *)t smallerThan:(NSUInteger)v;
 
-#endif
 
 /**
  * Performs modulo operation between two integers: dividend `a`
@@ -180,14 +179,14 @@
 
 @interface NSData (KSDataPrivateMethods)
 
-- (NSString *)ksBytesToStringWithEncoding:(NSString *)src_enc;
+- (NSString *)KSBytesToStringWithEncoding:(NSString *)src_enc;
 
 /**
  * Reverses given data, so that the first byte becomes the
  * last and the last one becomes the first. This should be used to avoid
  * the need of local variables at the caller.
  */
-- (NSData *)ksReverse;
+- (NSData *)KSReverse;
 
 /**
  * Performs a XOR processing with given data, XORing every byte of input with a single
@@ -195,7 +194,7 @@
  * @param key value to XOR with
  * @return processed data
  */
-- (NSData *)ksProcessXorOneWithKey:(uint8_t)key;
+- (NSData *)KSProcessXorOneWithKey:(uint8_t)key;
 
 /**
  * Performs a XOR processing with given data, XORing every byte of input with a key
@@ -204,7 +203,7 @@
  * @param key array of bytes to XOR with
  * @return processed data
  */
-- (NSData *)ksProcessXorManyWithKey:(NSData *)key;
+- (NSData *)KSProcessXorManyWithKey:(NSData *)key;
 
 /**
  * Performs a circular left rotation shift for a given buffer by a given amount of bits,
@@ -213,7 +212,7 @@
  * @param amount number of bits to shift by
  * @return copy of source array with requested shift applied
  */
-- (NSData *)ksProcessRotateLeftWithAmount:(int)amount;
+- (NSData *)KSProcessRotateLeftWithAmount:(int)amount;
 
 - (NSData *)KSBytesStripRightPadByte:(unsigned char)pad_byte;
 
@@ -226,7 +225,9 @@
      * @return unpacked data
      * @throws IOException
      */
-- (NSData *)process_zlib;
+- (NSData *)KSProcess_zlib;
+#endif
+
 @end
 
 @interface NSNumber (KSNumberPrivateMethods)

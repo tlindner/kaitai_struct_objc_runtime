@@ -15,9 +15,9 @@
 - (void)_read_le;
 - (void)_read_be;
 
-@property (strong) kstream *_io;
-@property (strong) kstruct *_parent;
-@property (strong) kstruct *_root;
+@property (strong,nonatomic) kstream *_io;
+@property (strong,nonatomic) kstruct *_parent;
+@property (strong,nonatomic) kstruct *_root;
 
 @end
 

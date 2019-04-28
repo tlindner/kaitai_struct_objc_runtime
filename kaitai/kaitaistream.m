@@ -654,9 +654,10 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         if (!consume) [self.fh seekToFileOffset:self.fh.offsetInFile-1];
 
-        result = [temp copy];
+        result = buffer;
     }
 
+    NSLog( @"Read bytes term: %@", result );
     return result;
 }
 
@@ -953,7 +954,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     strm.avail_in = self.length;
 
     unsigned char outbuffer[ZLIB_BUF_SIZE];
-    NSMutableData *outdata = [NSMutableData data];
+    NSMutableData *outData = [NSMutableData data];
 
     // get the decompressed bytes blockwise using repeated calls to inflate
     do {
@@ -962,8 +963,8 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 
         ret = inflate(&strm, 0);
 
-        if (outdata.length < strm.total_out)
-            [outdata appendData:[NSData dataWithBytes:outbuffer length:strm.total_out - outdata.length]];
+        if (outData.length < strm.total_out)
+            [outData appendData:[NSData dataWithBytes:outbuffer length:strm.total_out - outData.length]];
     } while (ret == Z_OK);
 
     if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
@@ -976,7 +977,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
         @throw myException;
     }
 
-    return [outdata copy];
+    return outData;
 }
 #endif
 

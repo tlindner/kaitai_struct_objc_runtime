@@ -212,6 +212,9 @@
  * @param amount number of bits to shift by
  * @return copy of source array with requested shift applied
  */
+
+- (int)KSCompare:(NSData *)compare;
+
 - (NSData *)KSProcessRotateLeftWithAmount:(int)amount;
 
 - (NSData *)KSBytesStripRightPadByte:(unsigned char)pad_byte;

@@ -863,6 +863,28 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     return [NSData dataWithBytesNoCopy:buf length:len];
 }
 
+- (int)KSCompare:(NSData *)compare
+{
+    size_t sl = self.length, cl = compare.length;
+    const unsigned char *s = self.bytes, *c = compare.bytes;
+    const unsigned char *se = &(s[sl]), *ce = &(c[cl]);
+
+    if(sl==0 && cl==0) return 0;
+    if(sl==0) return -1;
+    if(cl==0) return 1;
+
+    while(s<se && c<ce) {
+        if(*s != *c) return *s - *c;
+        s++;
+        c++;
+    }
+
+    if(sl<cl) return -1;
+    if(sl>cl) return 1;
+
+    return 0;
+}
+
 - (NSData *)KSProcessRotateLeftWithAmount:(int)amount
 {
     size_t len = self.length;

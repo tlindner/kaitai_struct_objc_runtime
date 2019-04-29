@@ -786,6 +786,12 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     return reversedString;
 }
 
+- (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary
+{
+    id result = [dictionary objectForKey:self];
+    if(result==nil) result = [NSNull null];
+    return @{ @"enum" : self, @"value" : result };
+}
 @end
 
 @implementation NSData (KSDataPrivateMethods)
@@ -984,7 +990,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 
 @implementation NSNumber (KSNumberPrivateMethods)
 
-- (NSDictionary *)ksENUMWithDictionary:(NSDictionary *)dictionary
+- (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary
 {
     for (NSString *key in dictionary) {
         if ([dictionary[key] isEqualToNumber:self]) {

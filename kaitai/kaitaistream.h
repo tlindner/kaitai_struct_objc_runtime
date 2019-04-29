@@ -175,6 +175,8 @@
  */
 - (NSString *)ksReverse;
 
+- (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary;
+
 @end
 
 @interface NSData (KSDataPrivateMethods)
@@ -235,7 +237,7 @@
 
 @interface NSNumber (KSNumberPrivateMethods)
 
-- (NSDictionary *)ksENUMWithDictionary:(NSDictionary *)dictionary;
+- (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary;
 
 @end
 

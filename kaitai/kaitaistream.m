@@ -657,7 +657,6 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         result = buffer;
     }
 
-    NSLog( @"Read bytes term: %@", result );
     return result;
 }
 
@@ -696,7 +695,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     }
 }
 
--(int) modA:(int)a b:(int)b;
++(int) modA:(int)a b:(int)b;
 {
     if (b <= 0)
         [NSException raise:@"modulus b <= 0" format:@""];

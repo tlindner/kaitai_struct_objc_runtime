@@ -155,7 +155,7 @@
  * and divisor `b`. Divisor `b` is expected to be positive. The
  * result is always 0 <= x <= b - 1.
  */
-- (int) modA:(int)a b:(int)b;
++ (int) modA:(int)a b:(int)b;
 
 @end
 

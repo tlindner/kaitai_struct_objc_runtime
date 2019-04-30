@@ -241,4 +241,10 @@
 
 @end
 
+@interface NSDictionary (KSDictionaryENUMPrivateMethods)
+
+- (BOOL) KSIsEqualToENUM:(NSDictionary *)compare;
+
+@end
+
 #endif

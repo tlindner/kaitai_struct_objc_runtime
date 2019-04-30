@@ -1002,3 +1002,11 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 }
 
 @end
+
+@implementation NSDictionary (KSDictionaryENUMPrivateMethods)
+
+- (BOOL) KSIsEqualToENUM:(NSDictionary *)compare
+{
+    return [self[@"value"] isEqualToNumber:compare[@"value"]];
+}
+@end

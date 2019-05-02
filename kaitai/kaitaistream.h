@@ -80,45 +80,45 @@
     // Signed
     // ------------------------------------------------------------------------
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s1;
+@property (readonly) int8_t read_s1;
 
     // ........................................................................
     // Big-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s2be;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s4be;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s8be;
+@property (readonly) int16_t read_s2be;
+@property (readonly) int32_t read_s4be;
+@property (readonly) int64_t read_s8be;
 
     // ........................................................................
     // Little-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s2le;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s4le;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_s8le;
+@property (readonly) int16_t read_s2le;
+@property (readonly) int32_t read_s4le;
+@property (readonly) int64_t read_s8le;
 
     // ------------------------------------------------------------------------
     // Unsigned
     // ------------------------------------------------------------------------
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u1;
+@property (readonly) uint8_t read_u1;
 
     // ........................................................................
     // Big-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u2be;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u4be;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u8be;
+@property (readonly) uint16_t read_u2be;
+@property (readonly) uint32_t read_u4be;
+@property (readonly) uint64_t read_u8be;
 
     // ........................................................................
     // Little-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u2le;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u4le;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_u8le;
+@property (readonly) uint16_t read_u2le;
+@property (readonly) uint32_t read_u4le;
+@property (readonly) uint64_t read_u8le;
 
 #pragma mark Floating point numbers
 
@@ -126,20 +126,20 @@
     // Big-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_f4be;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_f8be;
+@property (readonly) float read_f4be;
+@property (readonly) double read_f8be;
 
     // ........................................................................
     // Little-endian
     // ........................................................................
 
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_f4le;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSNumber *read_f8le;
+@property (readonly) float read_f4le;
+@property (readonly) double read_f8le;
 
 #pragma mark Unaligned bit values
 
 - (void)alignToByte;
-- (NSNumber *)read_bits_int:(NSUInteger)n;
+- (uint64_t)read_bits_int:(int)n;
 
 #pragma mark Byte arrays
 

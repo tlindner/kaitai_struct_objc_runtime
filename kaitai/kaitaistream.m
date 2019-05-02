@@ -61,19 +61,27 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 - (kstream *)initWithFileHandle:(NSFileHandle *)io
 {
-    self.fh = io;
-    self.size = [io seekToEndOfFile];
-    [io seekToFileOffset:0];
+    self = [super init];
+    if (self) {
+        self.fh = io;
+        _pos = [io offsetInFile];
+        self.size = [io seekToEndOfFile];
+        [io seekToFileOffset:_pos];
+    }
 
-    return [self init];
+    return self;
 }
 
 - (kstream *)initWithData:(NSData *)data
 {
-    self.dh = data;
-    self.size = data.length;
+    self = [super init];
+    if (self) {
+        self.pos = 0;
+        self.dh = data;
+        self.size = data.length;
+    }
 
-    return [self init];
+    return self;
 }
 
 #pragma mark Stream positioning
@@ -98,8 +106,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     if (self.dh) {
         if (_pos >= self.size) {
             return YES;
-        }
-        else {
+        } else {
             return NO;
         }
     }
@@ -107,8 +114,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     {
         if (self.fh.offsetInFile >= self.size) {
             return YES;
-        }
-        else {
+        } else {
             return NO;
         }
     }
@@ -127,393 +133,338 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 #pragma mark Integer numbers
 
-- (NSNumber *) read_s1
+- (int8_t) read_s1
 {
-    char t;
-    NSUInteger v_pos;
+    int8_t t;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 1)];
         _pos += 1;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:1] getBytes:&t range:NSMakeRange(0, 1)];
     }
 
-    [(self.dh ? self.dh : [self.fh readDataOfLength:1]) getBytes:&t range:NSMakeRange(v_pos, 1)];
-
-    return @(t);
+    return t;
 }
 
 #pragma mark Big-endian
 
-- (NSNumber *) read_s2be
+- (int16_t) read_s2be
 {
     int16_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 2)];
         _pos += 2;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:2] getBytes:&t range:NSMakeRange(0, 2)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt16(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_s4be
+- (int32_t) read_s4be
 {
     int32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_s8be
+- (int64_t) read_s8be
 {
     int64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
-
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
 #pragma mark Little-endian
-- (NSNumber *) read_s2le
+- (int16_t) read_s2le
 {
     int16_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 2)];
         _pos += 2;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:2] getBytes:&t range:NSMakeRange(0, 2)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt16(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_s4le
+- (int32_t) read_s4le
 {
     int32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_s8le
+- (int64_t) read_s8le
 {
     int64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
 #pragma mark Unsigned
 
-- (NSNumber *) read_u1
+- (uint8_t) read_u1
 {
-    unsigned char t;
-    NSUInteger v_pos;
+    uint8_t t;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 1)];
         _pos += 1;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:1] getBytes:&t range:NSMakeRange(0, 1)];
     }
 
-    [(self.dh ? self.dh : [self.fh readDataOfLength:1]) getBytes:&t range:NSMakeRange(v_pos, 1)];
-
-    return @(t);
+    return t;
 }
 
 #pragma mark Big-endian
 
-- (NSNumber *) read_u2be
+- (uint16_t) read_u2be
 {
     uint16_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 2)];
         _pos += 2;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:2] getBytes:&t range:NSMakeRange(0, 2)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt16(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_u4be
+- (uint32_t) read_u4be
 {
     uint32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_u8be
+- (uint64_t) read_u8be
 {
     uint64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
 #pragma mark Little-endian
 
-- (NSNumber *) read_u2le
+- (uint16_t) read_u2le
 {
     uint16_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 2)];
         _pos += 2;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:2] getBytes:&t range:NSMakeRange(0, 2)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:2]) getBytes:&t range:NSMakeRange(v_pos, 2)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt16(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_u4le
+- (uint32_t) read_u4le
 {
     uint32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
-- (NSNumber *) read_u8le
+- (uint64_t) read_u8le
 {
     uint64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
-    return @(t);
+    return t;
 }
 
 #pragma mark Floating point numbers
 #pragma mark Big-endian
 
-- (NSNumber *) read_f4be
+- (float) read_f4be
 {
     uint32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
     float *f = (float *)&t;
-    return @(*f);
+    return *f;
 }
 
-- (NSNumber *) read_f8be
+- (double) read_f8be
 {
     uint64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
     double *d = (double *)&t;
-    return @(*d);
+    return *d;
 }
 
 #pragma mark Little-endian
 
-- (NSNumber *) read_f4le
+- (float) read_f4le
 {
     uint32_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 4)];
         _pos += 4;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:4] getBytes:&t range:NSMakeRange(0, 4)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:4]) getBytes:&t range:NSMakeRange(v_pos, 4)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt32(t);
 #endif
 
     float *f = (float *)&t;
-    return @(*f);
+    return *f;
 }
 
-- (NSNumber *) read_f8le
+- (double) read_f8le
 {
     uint64_t t;
-    NSUInteger v_pos;
 
-    if (self.dh) {
-        v_pos = _pos;
+    if (self.dh != nil) {
+        [self.dh getBytes:&t range:NSMakeRange(_pos, 8)];
         _pos += 8;
     } else {
-        v_pos = 0;
+        [[self.fh readDataOfLength:8] getBytes:&t range:NSMakeRange(0, 8)];
     }
-
-    [(self.dh ? self.dh : [self.fh readDataOfLength:8]) getBytes:&t range:NSMakeRange(v_pos, 8)];
 
 #if BYTE_ORDER == BIG_ENDIAN
     t = _OSSwapInt64(t);
 #endif
 
     double *d = (double *)&t;
-    return @(*d);
+    return *d;
 }
 
 #pragma mark Unaligned bit values
@@ -524,29 +475,28 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.m_bits = 0;
 }
 
--(NSNumber *)read_bits_int:(NSUInteger)n
+-(uint64_t)read_bits_int:(int)n
 {
-    unsigned long bits_needed = n - self.m_bits_left;
+    int bits_needed = n - self.m_bits_left;
     if (bits_needed > 0) {
         // 1 bit  => 1 byte
         // 8 bits => 1 byte
         // 9 bits => 2 bytes
-        unsigned long bytes_needed = ((bits_needed - 1) / 8) + 1;
+        int bytes_needed = ((bits_needed - 1) / 8) + 1;
         if (bytes_needed > 8) {
-            NSException *myException = [NSException exceptionWithName:@"read_bits_int: more than 8 bytes requested" reason:nil userInfo:nil];
-            @throw myException;
+            [NSException raise:@"read_bits_int: more than 8 bytes requested" format:@""];
         }
-        char *buf;
+        char buf[8];
         NSUInteger v_pos;
 
         if (self.dh) {
             v_pos = _pos;
             _pos += bytes_needed;
+            [self.dh getBytes:&buf range:NSMakeRange(v_pos, bytes_needed)];
         } else {
             v_pos = 0;
+            [[self.fh readDataOfLength:bytes_needed] getBytes:&buf range:NSMakeRange(v_pos, bytes_needed)];
         }
-
-        [(self.dh ? self.dh : [self.fh readDataOfLength:bytes_needed]) getBytes:&buf range:NSMakeRange(v_pos, bytes_needed)];
 
         for (int i = 0; i < bytes_needed; i++) {
             uint8_t b = buf[i];
@@ -559,7 +509,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     // raw mask with required number of 1s, starting from lowest bit
     uint64_t mask = kaitai_kstream_get_mask_ones(n);
     // shift mask to align with highest bits available in @bits
-    unsigned long shift_bits = self.m_bits_left - n;
+    int shift_bits = self.m_bits_left - n;
     mask <<= shift_bits;
     // derive reading result
     uint64_t res = (self.m_bits & mask) >> shift_bits;
@@ -568,7 +518,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     mask = kaitai_kstream_get_mask_ones(self.m_bits_left);
     self.m_bits &= mask;
 
-    return [NSNumber numberWithUnsignedLong:res];
+    return res;
 }
 
 #pragma mark Byte arrays
@@ -618,8 +568,8 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         if (_pos == self.size) {
             if (eos_error) {
-                NSException *myException = [NSException exceptionWithName:@"read_bytes_term: encountered EOF" reason:nil userInfo:nil];
-                @throw myException;
+
+                [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
             }
         }
 
@@ -637,8 +587,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         {
             if (temp.length == 0) {
                 if (eos_error) {
-                    NSException *myException = [NSException exceptionWithName:@"read_bytes_term: encountered EOF" reason:nil userInfo:nil];
-                    @throw myException;
+                    [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
                 }
                 break;
             }
@@ -665,8 +614,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     NSData *actual = [self read_bytes:expected.length];
 
     if (![actual isEqualToData:expected]) {
-        NSException *myException = [NSException exceptionWithName:@"ensure_fixed_contents: actual data does not match expected data" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"ensure_fixed_contents: actual data does not match expected data" format:@""];
     }
 
     return actual;
@@ -690,8 +638,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 + (void) throwIf:(NSData *)t smallerThan:(NSUInteger)v
 {
     if (t.length < v) {
-        NSException *myException = [NSException exceptionWithName:[NSString stringWithFormat:@"smaller than expected read: %lu < %lu", (unsigned long)t.length, (unsigned long)v] reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:[NSString stringWithFormat:@"smaller than expected read: %lu < %lu", (unsigned long)t.length, (unsigned long)v] format:@""];
     }
 }
 
@@ -711,14 +658,11 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 - (instancetype)init
 {
-    self = [self initWith:nil withStruct:nil withRoot:nil];
-    if (self) {
-    }
+    self = [self initWith:nil withStruct:nil withRoot:nil withEndian:-1];
     return self;
-
 }
 
-- (instancetype) initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot:(kstruct *)p__root
+- (instancetype)initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot: (kstruct *)p__root withEndian:(int)p__endian
 {
     self = [super init];
     if (self) {
@@ -727,12 +671,19 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         if (p__root == nil) {
             self._root = self;
-        }
-        else {
+        } else {
             self._root = p__root;
         }
+
+        self._is_le = p__endian;
      }
 
+    return self;
+}
+
+- (instancetype) initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot:(kstruct *)p__root
+{
+    self = [self initWith:p__io withStruct:p__parent withRoot:p__root withEndian:-1];
     return self;
 }
 
@@ -832,8 +783,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     unsigned char *buf = malloc(len);
 
     if (!buf) {
-        NSException *myException = [NSException exceptionWithName:@"process_xor_one: out of memory" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_xor_one: out of memory" format:@""];
     }
 
     unsigned char *src = (unsigned char *)self.bytes;
@@ -854,8 +804,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     unsigned char *buf = malloc(len);
 
     if (!buf) {
-        NSException *myException = [NSException exceptionWithName:@"process_xor_many: out of memory" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_xor_many: out of memory" format:@""];
     }
 
     size_t ki = 0;
@@ -898,8 +847,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     unsigned char *self_buf = (unsigned char *)self.bytes;
 
     if (!buf) {
-        NSException *myException = [NSException exceptionWithName:@"process_rotate_left: out of memory" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_rotate_left: out of memory" format:@""];
     }
 
     for (size_t i = 0; i < len; i++) {
@@ -951,8 +899,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 
     ret = inflateInit(&strm);
     if (ret != Z_OK) {
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateInit error" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_zlib: inflateInit error" format:@""];
     }
 
     strm.next_in = src_ptr;
@@ -973,13 +920,11 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     } while (ret == Z_OK);
 
     if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: Z Lib error" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_zlib: Z Lib error" format:@""];
     }
 
     if (inflateEnd(&strm) != Z_OK) {
-        NSException *myException = [NSException exceptionWithName:@"process_zlib: inflateEnd error" reason:nil userInfo:nil];
-        @throw myException;
+        [NSException raise:@"process_zlib: inflateEnd error" format:@""];
     }
 
     return outData;

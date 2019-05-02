@@ -560,7 +560,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     unsigned long long start = _pos;
 
     if (self.dh) {
-        const char *buf = &(self.dh.bytes[_pos]);
+        const char *buf = self.dh.bytes;
         while( _pos < self.size )
         {
             if(buf[_pos++] == character) break;
@@ -568,12 +568,11 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         if (_pos == self.size) {
             if (eos_error) {
-
                 [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
             }
         }
 
-        NSRange range = NSMakeRange(start, start - _pos - (include ? 0 : 1));
+        NSRange range = NSMakeRange(start, _pos - start - (include ? 0 : 1));
         result = [self.dh subdataWithRange:range];
 
         if (!consume)

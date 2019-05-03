@@ -566,7 +566,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
             if(buf[_pos++] == character) break;
         }
 
-        if (_pos == self.size) {
+        if (_pos > self.size) {
             if (eos_error) {
                 [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
             }

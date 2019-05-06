@@ -16,8 +16,8 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 @property (readwrite) unsigned long long size;
 @property (strong) NSFileHandle *fh;
 @property (strong) NSData *dh;
-@property NSUInteger m_bits_left;
-@property NSUInteger m_bits;
+@property int m_bits_left;
+@property uint64_t m_bits;
 
 @end
 
@@ -103,21 +103,23 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 - (BOOL)isEof
 {
-    if (self.dh) {
+    if (self.m_bits_left > 0) {
+        return NO;
+    }
+
+	if(self.dh) {
         if (_pos >= self.size) {
             return YES;
         } else {
             return NO;
         }
-    }
-    else
-    {
+	} else {
         if (self.fh.offsetInFile >= self.size) {
             return YES;
         } else {
             return NO;
         }
-    }
+	}
 }
 
 - (void)seek:(unsigned long long)pos
@@ -517,7 +519,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.m_bits_left -= n;
     mask = kaitai_kstream_get_mask_ones(self.m_bits_left);
     self.m_bits &= mask;
-
+	
     return res;
 }
 
@@ -546,7 +548,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     if (self.dh) {
         NSRange range = NSMakeRange(_pos, self.size - _pos);
         result = [self.dh subdataWithRange:range];
-        _pos = self.size;
+        _pos = self.size + 1;
     } else {
         result = [self.fh readDataToEndOfFile];
     }
@@ -566,7 +568,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
             if(buf[_pos++] == character) break;
         }
 
-        if (_pos == self.size) {
+        if (_pos > self.size) {
             if (eos_error) {
                 [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
             }
@@ -604,7 +606,6 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         result = buffer;
     }
-
     return result;
 }
 
@@ -759,6 +760,11 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
         e = NSUTF16LittleEndianStringEncoding;
     } else if ([lc_enc isEqualToString:@"utf-16be"]) {
         e = NSUTF16BigEndianStringEncoding;
+    } else if ([lc_enc isEqualToString:@"sjis"]) {
+	    e = NSShiftJISStringEncoding;
+    } else if ([lc_enc isEqualToString:@"cp437"]) {
+    	/* https://stackoverflow.com/a/15701830 */
+	    e = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingDOSLatinUS);
     } else {
         [NSException raise:@"unsupported string encoding" format:@"unsupported string encoding: %@", lc_enc];
     }

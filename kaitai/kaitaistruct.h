@@ -4,21 +4,22 @@
 #import <Cocoa/Cocoa.h>
 #import "kaitaistream.h"
 
-@interface kstruct : NSObject
+@interface KSStruct : NSObject
 {
 
 }
 
 - (instancetype)init;
-- (instancetype)initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot: (kstruct *)p__root withEndian:(int)p__endian NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot: (kstruct *)p__root;
+- (instancetype)initWithStream:(KSStream *)p__io;
+- (instancetype)initWithStream:(KSStream *)p__io parent:(KSStruct *)p__parent root: (KSStruct *)p__root;
+- (instancetype)initWithStream:(KSStream *)p__io parent:(KSStruct *)p__parent root: (KSStruct *)p__root endian:(int)p__endian NS_DESIGNATED_INITIALIZER;
 - (void)_read;
 - (void)_read_le;
 - (void)_read_be;
 
-@property (strong,nonatomic) kstream *_io;
-@property (strong,nonatomic) kstruct *_parent;
-@property (strong,nonatomic) kstruct *_root;
+@property (strong,nonatomic) KSStream *_io;
+@property (strong,nonatomic) KSStruct *_parent;
+@property (strong,nonatomic) KSStruct *_root;
 @property int _is_le;
 
 @end

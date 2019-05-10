@@ -7,9 +7,10 @@
 #define KAITAI_STRUCT_VERSION 7000L
 
 /**
- * Kaitai Stream class (kaitai::kstream) is an implementation of
- * <a href="https://github.com/kaitai-io/kaitai_struct/wiki/Kaitai-Struct-stream-API">Kaitai Struct stream API</a>
- * for Objective-C / Cocoa. It's implemented as a wrapper over  NSFileHandle and NSData.
+ * Kaitai Stream class (KSStream) is an implementation of
+ * <a href="https://github.com/kaitai-io/kaitai_struct/wiki/Kaitai-Struct-stream-API">
+ * Kaitai Struct stream API</a> for Objective-C / Cocoa. It's implemented as a wrapper
+ * over NSFileHandle and NSData.
  *
  * It provides a wide variety of simple methods to read (parse) binary
  * representations of primitive types, such as integer and floating
@@ -24,27 +25,27 @@
  * job.
  */
 
-@interface kstream : NSObject
+@interface KSStream : NSObject
 {
     unsigned long long _pos;
 }
 
-+ (kstream *)streamWithURL:(NSURL *)url;
-+ (kstream *)streamWithFileHandle:(NSFileHandle *)io;
-+ (kstream *)streamWithData:(NSData *)data;
++ (KSStream *)streamWithURL:(NSURL *)url;
++ (KSStream *)streamWithFileHandle:(NSFileHandle *)io;
++ (KSStream *)streamWithData:(NSData *)data;
 
     /**
      * Constructs new Kaitai Stream object, wrapping a given std::istream.
      * \param io NSInputStream object to use for this Kaitai Stream
      */
-- (kstream *)initWithFileHandle:(NSFileHandle *)io;
+- (KSStream *)initWithFileHandle:(NSFileHandle *)io;
 
     /**
      * Constructs new Kaitai Stream object, wrapping a given in-memory data
      * buffer.
      * \param data data buffer to use for this Kaitai Stream
      */
-- (kstream *)initWithData:(NSData *)data;
+- (KSStream *)initWithData:(NSData *)data;
 
     /**
      * Check if stream pointer is at the end of stream. Note that the semantics
@@ -139,16 +140,34 @@
 #pragma mark Unaligned bit values
 
 - (void)alignToByte;
-- (uint64_t)read_bits_int:(int)n;
+- (uint64_t)readBitsInt:(int)n;
 
 #pragma mark Byte arrays
 
-- (NSData *)read_bytes:(NSUInteger)len;
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSData *read_bytes_full;
-- (NSData *)read_bytes_term:(char)character include:(BOOL)include consume:(BOOL)consume eosErr:(BOOL)eos_error;
-- (NSData *)ensure_fixed_contents:(NSData *)expected;
-+ (void) throwIf:(NSData *)t smallerThan:(NSUInteger)v;
+/**
+ * Reads len number of bytes of a stream.
+ */
+- (NSData *)readBytes:(NSUInteger)len;
 
+/**
+ * Reads all the bytes a stream contains.
+ */
+@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSData *readBytesFull;
+
+/**
+ * Reads bytes until a terminator is encountered.
+ */
+- (NSData *)readBytesTerm:(char)character include:(BOOL)include consume:(BOOL)consume eosErr:(BOOL)eos_error;
+
+/**
+ * Reads bytes and compares them to a fixed value.
+ */
+- (NSData *)ensureFixedContents:(NSData *)expected;
+
+/**
+ * Throws an exception if an NSData object is not the expected length.
+ */
++ (void) throwIf:(NSData *)t shorterThan:(NSUInteger)v;
 
 /**
  * Performs modulo operation between two integers: dividend `a`
@@ -166,14 +185,14 @@
  * Should be used in place of std::to_string() (which is available only
  * since C++11) in older C++ implementations.
  */
-- (NSNumber *)ksToNumberWithBase:(int)base;
+- (NSNumber *)KSToNumberWithBase:(int)base;
 
 /**
  * Reverses given string, so that the first character becomes the
  * last and the last one becomes the first. This should be used to avoid
  * the need of local variables at the caller.
  */
-- (NSString *)ksReverse;
+- (NSString *)KSReverse;
 
 - (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary;
 
@@ -208,19 +227,34 @@
 - (NSData *)KSProcessXorManyWithKey:(NSData *)key;
 
 /**
+ * Compares two NSData objects.
+ * @param compare data to compare with
+ * @return -1, 0 or 1
+ */
+- (int)KSCompare:(NSData *)compare;
+
+/**
  * Performs a circular left rotation shift for a given buffer by a given amount of bits,
  * using groups of 1 bytes each time. Right circular rotation should be performed
  * using this procedure with corrected amount.
  * @param amount number of bits to shift by
  * @return copy of source array with requested shift applied
  */
-
-- (int)KSCompare:(NSData *)compare;
-
 - (NSData *)KSProcessRotateLeftWithAmount:(int)amount;
 
+/**
+ * Removes the pad_byte from the right end of the data.
+ * @param pad_byte byte to look for
+ * @return copy of data with pad bytes removed
+ */
 - (NSData *)KSBytesStripRightPadByte:(unsigned char)pad_byte;
 
+/**
+ * Looks for termination bytes in data and removes data to the left
+ * @param term byte to look for
+ * @param include flag to include or exclue the termination byte
+ * @return copy of data up to termination byte
+ */
 - (NSData *)KSBytesTerminateTerm:(char)term include:(BOOL)include;
 
 #ifdef KS_ZLIB
@@ -237,12 +271,23 @@
 
 @interface NSNumber (KSNumberPrivateMethods)
 
+/**
+ * Converts self (NSNumber) in to a Kaitai Struct Objective C enum.
+ * @param dictionary contains the complete enum definition
+ * @return Kaitai Struct Objective C enum
+ */
 - (NSDictionary *)KSENUMWithDictionary:(NSDictionary *)dictionary;
 
 @end
 
 @interface NSDictionary (KSDictionaryENUMPrivateMethods)
 
+/**
+ * Compares the two keys in a Kaitai Struct Objective C enum to see
+ * if they are equal.
+ * @param compare contains enum to compare against.
+ * @return YES or NO
+ */
 - (BOOL) KSIsEqualToENUM:(NSDictionary *)compare;
 
 @end

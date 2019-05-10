@@ -10,7 +10,7 @@
 
 uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
-@interface kstream ()
+@interface KSStream ()
 
 @property (readwrite) unsigned long long pos;
 @property (readwrite) unsigned long long size;
@@ -21,17 +21,17 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 @end
 
-@implementation kstream
+@implementation KSStream
 @dynamic pos;
 @dynamic eof;
 
-+ (kstream *)streamWithURL:(NSURL *)url
++ (KSStream *)streamWithURL:(NSURL *)url
 {
     NSError *myErr;
     NSFileHandle *io = [NSFileHandle fileHandleForReadingFromURL:url error: &myErr];
 
     if (io) {
-        return [[kstream alloc] initWithFileHandle:io];
+        return [[KSStream alloc] initWithFileHandle:io];
     }
     else {
         [NSException raise:@"Count not Open URL" format:@"%@", myErr];
@@ -40,14 +40,14 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return nil;
 }
 
-+ (kstream *)streamWithFileHandle:(NSFileHandle *)io
++ (KSStream *)streamWithFileHandle:(NSFileHandle *)io
 {
-    return [[kstream alloc] initWithFileHandle:io];
+    return [[KSStream alloc] initWithFileHandle:io];
 }
 
-+ (kstream *)streamWithData:(NSData *)data
++ (KSStream *)streamWithData:(NSData *)data
 {
-    return [[kstream alloc] initWithData:data];
+    return [[KSStream alloc] initWithData:data];
 }
 
 - (instancetype)init {
@@ -59,7 +59,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return self;
 }
 
-- (kstream *)initWithFileHandle:(NSFileHandle *)io
+- (KSStream *)initWithFileHandle:(NSFileHandle *)io
 {
     self = [super init];
     if (self) {
@@ -72,7 +72,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return self;
 }
 
-- (kstream *)initWithData:(NSData *)data
+- (KSStream *)initWithData:(NSData *)data
 {
     self = [super init];
     if (self) {
@@ -477,7 +477,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.m_bits = 0;
 }
 
--(uint64_t)read_bits_int:(int)n
+-(uint64_t)readBitsInt:(int)n
 {
     int bits_needed = n - self.m_bits_left;
     if (bits_needed > 0) {
@@ -486,7 +486,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         // 9 bits => 2 bytes
         int bytes_needed = ((bits_needed - 1) / 8) + 1;
         if (bytes_needed > 8) {
-            [NSException raise:@"read_bits_int: more than 8 bytes requested" format:@""];
+            [NSException raise:@"readBitsInt: more than 8 bytes requested" format:@""];
         }
         char buf[8];
         NSUInteger v_pos;
@@ -519,13 +519,13 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     self.m_bits_left -= n;
     mask = kaitai_kstream_get_mask_ones(self.m_bits_left);
     self.m_bits &= mask;
-	
+
     return res;
 }
 
 #pragma mark Byte arrays
 
--(NSData *)read_bytes:(NSUInteger)len
+-(NSData *)readBytes:(NSUInteger)len
 {
     NSData *result;
 
@@ -536,12 +536,12 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         result = [self.fh readDataOfLength:len];
     }
 
-    [kstream throwIf:result smallerThan:len];
+    [KSStream throwIf:result shorterThan:len];
 
     return result;
 }
 
--(NSData *)read_bytes_full
+-(NSData *)readBytesFull
 {
     NSData *result;
 
@@ -556,7 +556,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return result;
 }
 
--(NSData *)read_bytes_term:(char)character include:(BOOL)include consume:(BOOL)consume eosErr:(BOOL)eos_error
+-(NSData *)readBytesTerm:(char)character include:(BOOL)include consume:(BOOL)consume eosErr:(BOOL)eos_error
 {
     NSData *result;
     unsigned long long start = _pos;
@@ -570,7 +570,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
         if (_pos > self.size) {
             if (eos_error) {
-                [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
+                [NSException raise:@"readBytesTerm: encountered EOF" format:@""];
             }
         }
 
@@ -588,7 +588,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         {
             if (temp.length == 0) {
                 if (eos_error) {
-                    [NSException raise:@"read_bytes_term: encountered EOF" format:@""];
+                    [NSException raise:@"readBytesTerm: encountered EOF" format:@""];
                 }
                 break;
             }
@@ -609,12 +609,12 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return result;
 }
 
--(NSData *)ensure_fixed_contents:(NSData *)expected
+-(NSData *)ensureFixedContents:(NSData *)expected
 {
-    NSData *actual = [self read_bytes:expected.length];
+    NSData *actual = [self readBytes:expected.length];
 
     if (![actual isEqualToData:expected]) {
-        [NSException raise:@"ensure_fixed_contents: actual data does not match expected data" format:@""];
+        [NSException raise:@"ensureFixedContents: actual data does not match expected data" format:@""];
     }
 
     return actual;
@@ -635,7 +635,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
     return [NSData dataWithBytesNoCopy:reverseBytes length: datalength];
 }
 
-+ (void) throwIf:(NSData *)t smallerThan:(NSUInteger)v
++ (void) throwIf:(NSData *)t shorterThan:(NSUInteger)v
 {
     if (t.length < v) {
         [NSException raise:[NSString stringWithFormat:@"smaller than expected read: %lu < %lu", (unsigned long)t.length, (unsigned long)v] format:@""];
@@ -654,15 +654,27 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 
 @end
 
-@implementation kstruct
+@implementation KSStruct
 
 - (instancetype)init
 {
-    self = [self initWith:nil withStruct:nil withRoot:nil withEndian:-1];
+    self = [self initWithStream:nil parent:nil root:nil endian:-1];
     return self;
 }
 
-- (instancetype)initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot: (kstruct *)p__root withEndian:(int)p__endian
+- (instancetype) initWithStream:(KSStream *)p__io
+{
+    self = [self initWithStream:p__io parent:nil root:nil endian:-1];
+    return self;
+}
+
+- (instancetype) initWithStream:(KSStream *)p__io parent:(KSStruct *)p__parent root:(KSStruct *)p__root
+{
+    self = [self initWithStream:p__io parent:p__parent root:p__root endian:-1];
+    return self;
+}
+
+- (instancetype)initWithStream:(KSStream *)p__io parent:(KSStruct *)p__parent root: (KSStruct *)p__root endian:(int)p__endian
 {
     self = [super init];
     if (self) {
@@ -678,12 +690,6 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
         self._is_le = p__endian;
      }
 
-    return self;
-}
-
-- (instancetype) initWith:(kstream *)p__io withStruct:(kstruct *)p__parent withRoot:(kstruct *)p__root
-{
-    self = [self initWith:p__io withStruct:p__parent withRoot:p__root withEndian:-1];
     return self;
 }
 
@@ -714,7 +720,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
 
 @implementation NSString (KSStringPrivateMethods)
 
-- (NSNumber *)ksToNumberWithBase:(int)base
+- (NSNumber *)KSToNumberWithBase:(int)base
 {
     if (base == 10) {
         return @(self.intValue);
@@ -723,7 +729,7 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n) {
     }
 }
 
-- (NSString *)ksReverse
+- (NSString *)KSReverse
 {
     /* https://stackoverflow.com/a/6720235 */
     NSMutableString *reversedString = [NSMutableString string];

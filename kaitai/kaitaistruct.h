@@ -18,8 +18,8 @@
 - (void)_read_be;
 
 @property (strong,nonatomic) KSStream *_io;
-@property (strong,nonatomic) KSStruct *_parent;
-@property (strong,nonatomic) KSStruct *_root;
+@property (weak,nonatomic) KSStruct *_parent;
+@property (weak,nonatomic) KSStruct *_root;
 @property int _is_le;
 
 @end

@@ -28,14 +28,23 @@ uint64_t kaitai_kstream_get_mask_ones(unsigned long n);
 + (KSStream *)streamWithURL:(NSURL *)url
 {
     NSError *myErr;
-    NSFileHandle *io = [NSFileHandle fileHandleForReadingFromURL:url error: &myErr];
-
-    if (io) {
-        return [[KSStream alloc] initWithFileHandle:io];
+    
+    if ([url isFileURL]) {
+        NSFileHandle *io = [NSFileHandle fileHandleForReadingFromURL:url error: &myErr];
+        
+        if (io) {
+            return [[KSStream alloc] initWithFileHandle:io];
+        }
+    } else {
+    
+        NSData *dio = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&myErr];
+        
+        if (dio) {
+            return [[KSStream alloc] initWithData:dio];
+        }
     }
-    else {
-        [NSException raise:@"Count not Open URL" format:@"%@", myErr];
-    }
+    
+    [NSException raise:@"Count not read URL" format:@"%@", myErr];
 
     return nil;
 }
